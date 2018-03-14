@@ -1,113 +1,85 @@
 module.exports = function solveSudoku(matrix) {
+  let Clone = [[],[], [], [], [], [], [], [], []];
+ let arr_of_numb=[1, 2, 3, 4, 5, 6, 7, 8, 9];
 
-  let matrixClone = matrix.slice();
-  let arr_of_numb=[1, 2, 3, 4, 5, 6, 7, 8, 9];
+ for (let i = 0; i < 9; i++) {
+   for (let j = 0; j < 9; j++) {
+     if (matrix[i][j] === 0) {
+       Clone[i].push(arr_of_numb.slice());
+       for (let k = 0; k < 9; k++) {
+         if (matrix[i][k] !== 0) {
+           let position = Clone[i][j].indexOf(matrix[i][k]);
+           if (position >= 0){
+             Clone[i][j].splice(position, 1);
+           }
+         }
+       }
+       for (let k = 0; k < 9; k++) {
+         if (matrix[k][j] !== 0) {
+           let position = Clone[i][j].indexOf(matrix[k][j]);
+           if (position >= 0){
+             Clone[i][j].splice(position, 1);
+           }
+         }
+       }
+       for (let k = Math.floor(i/3)*3; k < Math.floor(i/3)*3+3; k++) {
+         for (let l = Math.floor(j/3)*3; l < Math.floor(j/3)*3+3; l++) {
+           if (matrix[k][l] !== 0) {
+             let position = Clone[i][j].indexOf(matrix[k][l]);
+             if (position >= 0){
+               Clone[i][j].splice(position, 1);
+             }
+           }
+         }
+       }
+     }
+     else{
+       Clone[i].push([]);
 
-  function var_numbers(matrixClone) {
-    for (let i = 0; i < 9; i++) {
-      for (let j = 0; j < 9; j++) {
-        if (matrixClone[i][j] === 0) {
-          matrixClone[i][j] = arr_of_numb;
-        }
-      }
-    }
-  }
-  //вычленяем строку и кидаем значения в массив, что бы потом сравнить
-  function numb_row(matrixClone, y){
-    let Arr_numb_row = [];
-    for (let x = 0; x < 9; x++) {
-      Arr_numb_row.push(matrixClone[y][x]);
-    }
-    return Arr_numd_row;
-  }
-  //то же самое для столбца
-  function numb_column(matrixClone, x) {
-    let Arr_numb_column = [];
-    for (let y = 0; y < 9; y++) {
-      Arr_numb_column.push(matrixClone[y][x]);
-    }
-    return Arr_numb_column;
-  }
+     }
+   }
+ }
+ let has_undefined_position = true;
+ let defined_some_position = true;
+ while (has_undefined_position && defined_some_position){
+   has_undefined_position = false;
+   defined_some_position = false;
+   for (let i = 0; i < 9; i++) {
+     for (let j = 0; j < 9; j++) {
+       let Clone_len = Clone[i][j].length;
+       if (Clone_len > 0) {
+         has_undefined_position = true;
+         if (Clone_len === 1){
+           defined_some_position = true;
+           matrix[i][j] = Clone[i][j][0];
+           for (let k = 0; k < 9; k++){
+             let position = Clone[i][k].indexOf(Clone[i][j][0]);
+             if (position >= 0){
+               Clone[i][k].splice(position, 1);
+             }
+           }
 
-/*  function delete_in_row(matr) {
-    for (let i = 0; i < 9; i++) {
-      let row_numbers = collectNumbersFromBigStroke(matr, i)
-      deletingNumbersInProbalitiesOnThisStroke(matr, row_numbers, i);
-    }
-  }
+           for (let k = 0; k < 9; k++){
+             let position = Clone[k][j].indexOf(Clone[i][j][0]);
+             if (position >= 0){
+               Clone[k][j].splice(position, 1);
+             }
+           }
 
-  function collectNumbersFromBigStroke(arr, y) {
-    let resultArr = [];
-    for (let x = 0; x < 9; x++) {
-      if (!Array.isArray(arr[y][x])) {
-        resultArr.push(arr[y][x]);
-      }
-    }
-    return resultArr
-  }
+           for (let k = Math.floor(i/3)*3; k < Math.floor(i/3)*3+3; k++) {
+             for (let l = Math.floor(j/3)*3; l < Math.floor(j/3)*3+3; l++) {
+               let position = Clone[k][l].indexOf(Clone[i][j][0]);
+               if (position >= 0){
+                 Clone[k][l].splice(position, 1);
+               }
+             }
+           }
+           Clone[i][j].splice(0, 1);
+         }
+       }
+     }
+   }
+ }
 
-  function deletingNumbersInProbalitiesOnThisStroke(arr, strokeNumbers, y) {
-    strokeNumbers.forEach(number => {
-      for (let x = 0; x < 9; x++) {
-        if (Array.isArray(arr[y][x])) {
-          if (arr[y][x].indexOf(number) !== -1) {
-            arr[y][x].splice(arr[y][x].indexOf(number), 1);
-          }
-        }
-      }
-    });
-  }
-
-  function collectNumbersFromBigColumn(arr, x) {
-    let resultArr = [];
-    for (let y = 0; y < 9; y++) {
-      if (!Array.isArray(arr[y][x])) {
-        resultArr.push(arr[y][x]);
-      }
-    }
-    return resultArr
-  }
-
-  function deleteImpossProbalitiesByColumns(matr) {
-    for (let x = 0; x < 9; x++) {
-      let columnNumbers = collectNumbersFromBigColumn(matr, x)
-      deletingNumbersInProbalitiesOnThisColumn(matr, columnNumbers, x);
-    }
-  }
-
-  function deletingNumbersInProbalitiesOnThisColumn(arr, columnNumbers, x) {
-    columnNumbers.forEach(number => {
-      for (let y = 0; y < 9; y++) {
-        if (Array.isArray(arr[y][x])) {
-          if (arr[y][x].indexOf(number) !== -1) {
-            arr[y][x].splice(arr[y][x].indexOf(number), 1);
-
-          }
-        }
-      }
-    });
-  }
-
-  function changeSoloArrProbToNumb(arr) {
-    for (let y = 0; y < 9; y++) {
-      for (let x = 0; x < 9; x++) {
-        if (Array.isArray(arr[y][x]) && arr[y][x].length === 1) {
-          arr[y][x] = arr[y][x][0];
-        }
-      }
-    }
-  }
-
-/*  console.log(matrixClone);
-  console.log("AFTER STROKES CLEANING #################################");*/
-  var_numbers(matrixClone)
-  delete_in_row(matrixClone);
-  changeSoloArrProbToNumb(matrixClone)
-/*  console.log(matrixClone);
-  console.log("AFTER COLUMNS CLEANING #################################");*/
-  deleteImpossProbalitiesByColumns(matrixClone);
-  changeSoloArrProbToNumb(matrixClone)
-  /*console.log(matrixClone);*/
-
-  return matrixClone;
+ return(matrix);
 }
